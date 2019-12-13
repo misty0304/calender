@@ -3,11 +3,13 @@
     <div class="m-calendar-radio" v-if="type === 'radio'">
       <m-date-picker-head
         :headOptions="headOptions"
+        :year="time.year"
         @handlePrevYear="handlePrevYear"
         @handlePrevMonth="handlePrevMonth"
         @handleNextMonth="handleNextMonth"
         @handleNextYear="handleNextYear"
         @handleToday="handleToday"
+        @methodChangeTime="methodChangeTime"
       />
       <ul class="m-calendar-week clearfix">
         <li v-for="(item, index) in calendarTitleArr" :key="index" class="week-item">{{ item }}</li>
@@ -93,7 +95,7 @@ export default {
         date: ''
       },
       // 日历表头
-      calendarTitleArr: ['一', '二', '三', '四', '五', '六', '日 '],
+      calendarTitleArr: ['一', '二', '三', '四', '五', '六', '日'],
       // 当天日期
       time: { year, month, day },
       // 日历数据
@@ -213,10 +215,13 @@ export default {
         this.visibleCalendar = calendatArr
         this.calendarDictionary[new Date(startTime + i * 24 * 60 * 60 * 1000).getTime()] = obj
       }
+    },
+    // 切换时间
+    methodChangeTime(data) {
+      this.time = Object.assign({}, data, { day: this.time.day })
     }
   },
-  created() {
-  },
+  created() {},
   watch: {
     // 更新头部日期
     time: {

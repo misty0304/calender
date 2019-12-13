@@ -5,7 +5,24 @@
         <m-icon class="m-calendar-prev" icon-name="double_arrow_left" :icon-size="24" @click="handlePrevYear" />
         <m-icon class="m-calendar-prev m-ml-24" icon-name="year_arrow_left" :icon-size="24" @click="handlePrevMonth" />
       </span>
-      <span class="m-calendar-headDate"> {{ this.headOptions.date }} </span>
+      <span class="m-calendar-headDate">
+        <m-popover
+          trigger="click"
+          :options="{ placement: 'bottom' }"
+          :showPopover="showChangeTime"
+          @show="methodShowPopover"
+          @hide="methodHidePopover"
+        >
+          <div class="m-popper-content">
+            <div class="checkitem">
+              <m-date-year-month :year="year" :showChangeTime="showChangeTime" @methodChangeTime="methodChangeTime" />
+            </div>
+          </div>
+          <a slot="reference">
+            {{ this.headOptions.date }}
+          </a>
+        </m-popover>
+      </span>
       <span>
         <m-icon class="m-calendar-next m-mr-24" icon-name="year_arrow_right" :icon-size="24" @click="handleNextMonth" />
         <m-icon class="m-calendar-next" icon-name="double_arrow_right" :icon-size="24" @click="handleNextYear" />
@@ -16,13 +33,20 @@
 </template>
 
 <script>
+import MDateYearMonth from './MDateYearMonth.vue'
+
 export default {
+  components: {
+    MDateYearMonth
+  },
   props: {
-    headOptions: Object
+    headOptions: Object,
+    year: Number
   },
   data() {
     return {
-      headStyle: ''
+      headStyle: '',
+      showChangeTime: true // 是否显示切换年月popover
     }
   },
   mounted() {
@@ -48,22 +72,34 @@ export default {
     // 回到今天
     handleToday() {
       this.$emit('handleToday')
-    }
+    },
+    // 切换时间
+    methodChangeTime(data) {
+      this.$emit('methodChangeTime', data)
+      this.showChangeTime = false
+    },
+    // 显示切换年月
+    methodShowPopover() {
+      this.showChangeTime = true
+    },
+    // 关闭切换年月
+    methodHidePopover() {}
   }
 }
 </script>
 
-<style lang="less">
+<style lang="scss">
 .m-calendar-header {
   padding: 12px 0;
   width: 100%;
   border-bottom: 1px solid #ebeef5;
-  .m-calendar-header-radio{
+  .m-calendar-header-radio {
     padding: 0 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    .m-calendar-prev, .m-calendar-next {
+    .m-calendar-prev,
+    .m-calendar-next {
       display: inline-block;
       vertical-align: middle;
 
@@ -79,6 +115,9 @@ export default {
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
+      .checkitem {
+        padding: 10px;
+      }
     }
   }
 }
