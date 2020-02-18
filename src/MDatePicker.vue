@@ -25,11 +25,11 @@
             { handleDay: item.clickDay },
             { disable: item.disable }
           ]"
-          :style="{ height: boxHeight + 'px' }"
         >
           <span
             class="date-day"
             :class="[{ 'opacity-class': !methodIsCurrentMonth(item.date) }]"
+            :style="{ height: boxHeight + 'px', 'line-height': boxHeight + 'px' }"
             @click="handleClickDay(item)"
           >
             {{ item.day }}
