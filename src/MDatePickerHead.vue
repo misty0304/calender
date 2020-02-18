@@ -1,6 +1,6 @@
 <template>
   <div class="m-calendar-header clear">
-    <div class="m-calendar-header-radio" v-if="this.headOptions.type == 'radio'">
+    <div class="m-calendar-header-radio">
       <span>
         <m-icon class="m-calendar-prev" icon-name="double_arrow_left" :icon-size="24" @click="handlePrevYear" />
         <m-icon class="m-calendar-prev m-ml-24" icon-name="year_arrow_left" :icon-size="24" @click="handlePrevMonth" />
@@ -40,11 +40,14 @@ export default {
     MDateYearMonth
   },
   props: {
+    // 头部数据
     headOptions: Object,
+    // 年份
     year: Number
   },
   data() {
     return {
+      // 头部样式
       headStyle: '',
       showChangeTime: true // 是否显示切换年月popover
     }

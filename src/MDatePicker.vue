@@ -20,22 +20,58 @@
           :key="index"
           class="date-view"
           :class="[
-            { 'month-class': !isCurrentMonth(item.date) },
-            { todayBg: isCurrentDay(item.date) },
+            { 'month-class': !methodIsCurrentMonth(item.date) },
+            { todayBg: methodIsCurrentDay(item.date) },
             { handleDay: item.clickDay },
             { disable: item.disable }
           ]"
+          :style="{ height: boxHeight + 'px' }"
         >
           <span
             class="date-day"
-            :class="[{ 'opacity-class': !isCurrentMonth(item.date) }]"
+            :class="[{ 'opacity-class': !methodIsCurrentMonth(item.date) }]"
             @click="handleClickDay(item)"
           >
             {{ item.day }}
             <div class="dot">
-              <slot v-if="item.showDot" color="#000000"></slot>
+              <slot v-if="item.showDot" :color="item.color"></slot>
             </div>
           </span>
+        </li>
+      </ul>
+    </div>
+    <div class="m-calendar-rectangle" v-if="type === 'rectangle'">
+      <m-date-picker-head
+        :headOptions="headOptions"
+        :year="time.year"
+        @handlePrevYear="handlePrevYear"
+        @handlePrevMonth="handlePrevMonth"
+        @handleNextMonth="handleNextMonth"
+        @handleNextYear="handleNextYear"
+        @handleToday="handleToday"
+        @methodChangeTime="methodChangeTime"
+      />
+      <ul class="m-calendar-week clearfix">
+        <li v-for="(item, index) in calendarTitleArr" :key="index" class="week-item">{{ item }}</li>
+      </ul>
+      <ul class="m-calendar-view clearfix">
+        <li
+          v-for="(item, index) in visibleCalendar"
+          :key="index"
+          class="date-view"
+          :class="[
+            { 'month-class': !methodIsCurrentMonth(item.date) },
+            { todayBg: methodIsCurrentDay(item.date) },
+            { handleDay: item.clickDay },
+            { disable: item.disable }
+          ]"
+          :style="{ height: boxHeight + 'px' }"
+          @click="handleClickDay(item)"
+        >
+          <span class="date-day" :class="[{ 'opacity-class': !methodIsCurrentMonth(item.date) }]">
+            {{ item.day }}
+          </span>
+          <slot></slot>
         </li>
       </ul>
     </div>
@@ -57,24 +93,28 @@ export default {
         return 'radio'
       }
     },
+    // 块模式单元格高度
     boxHeight: {
       type: Number,
       default() {
         return '30'
       }
     },
+    // 单元格风格
     itemCustom: {
       type: Function,
       default() {
         return () => {}
       }
     },
+    // 外部传入方法，判断单元格是否disabled
     pickerOptions: {
       type: Function,
       default() {
         return () => {}
       }
     },
+    // 每月禁用日期
     watchOptions: {
       type: [Array, String],
       default() {
@@ -90,9 +130,9 @@ export default {
     return {
       // 头部
       headOptions: {
-        type: this.type,
+        type: this.type, // 格式
         // style: this.options.headStyle,
-        date: ''
+        date: '' // 日期
       },
       // 日历表头
       calendarTitleArr: ['一', '二', '三', '四', '五', '六', '日'],
@@ -106,27 +146,13 @@ export default {
   },
   computed: {
     // 样式
-    dayStyle() {
+    computedDayStyle() {
       return {
         textAlign: this.options.viewStyle.day // 文案样式
       }
     }
   },
   methods: {
-    // 是否是当前月
-    isCurrentMonth(date) {
-      let { year: currentYear, month: currentMonth } = utils.getNewDate(
-        utils.getDate(this.time.year, this.time.month, 1)
-      )
-      let { year, month } = utils.getNewDate(date)
-      return currentYear === year && currentMonth === month
-    },
-    // 是否是今天
-    isCurrentDay(date) {
-      let { year: currentYear, month: currentMonth, day: currentDay } = utils.getNewDate(new Date())
-      let { year, month, day } = utils.getNewDate(date)
-      return currentYear === year && currentMonth === month && currentDay === day
-    },
     // 上一年
     handlePrevYear() {
       this.methodChangeHeadTime('PrevYear')
@@ -153,6 +179,21 @@ export default {
       if (item.disable) return false
       this.$emit('handleClickDay', item)
     },
+    // 是否是当前月
+    methodIsCurrentMonth(date) {
+      let { year: currentYear, month: currentMonth } = utils.getNewDate(
+        utils.getDate(this.time.year, this.time.month, 1)
+      )
+      let { year, month } = utils.getNewDate(date)
+      return currentYear === year && currentMonth === month
+    },
+    // 是否是今天
+    methodIsCurrentDay(date) {
+      let { year: currentYear, month: currentMonth, day: currentDay } = utils.getNewDate(new Date())
+      let { year, month, day } = utils.getNewDate(date)
+      return currentYear === year && currentMonth === month && currentDay === day
+    },
+    // 改变头部时间
     methodChangeHeadTime(type) {
       let time = utils.getDate(this.time.year, this.time.month, 1)
       switch (type) {
@@ -180,7 +221,7 @@ export default {
       const { year, month } = utils.getNewDate(utils.getDate(this.time.year, this.time.month, 1))
       this.currentMonth = month
       this.headOptions.date = `${this.time.year} 年 ${this.time.month + 1} 月`
-      const calendatArr = []
+      const calendarArr = []
 
       const currentFirstDay = utils.getDate(year, month, 1)
 
@@ -211,14 +252,15 @@ export default {
           disable: this.pickerOptions(date)
         }
 
-        calendatArr.push(Object.assign({}, obj, this.itemCustom(obj)))
-        this.visibleCalendar = calendatArr
+        calendarArr.push(Object.assign({}, obj, this.itemCustom(obj)))
+        this.visibleCalendar = calendarArr
         this.calendarDictionary[new Date(startTime + i * 24 * 60 * 60 * 1000).getTime()] = obj
       }
     },
     // 切换时间
     methodChangeTime(data) {
       this.time = Object.assign({}, data, { day: this.time.day })
+      this.$emit('methodChangeTime', data)
     }
   },
   created() {},
@@ -307,8 +349,8 @@ ol {
         cursor: pointer;
         text-align: center;
         width: 30px;
-        height: 30px;
-        line-height: 30px;
+        height: 100%;
+        line-height: 100%;
         display: block;
         border-radius: 50%;
         border: 1px solid #e4e7ea;
@@ -367,6 +409,97 @@ ol {
         color: #ffffff !important;
         border: 1px solid #09bdc6;
       }
+    }
+  }
+}
+.m-calendar-rectangle {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  .clearfix:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: ' ';
+    clear: both;
+    height: 0;
+  }
+  .clearfix {
+    *zoom: 1;
+  }
+  .m-calendar-week {
+    width: 100%;
+    height: 46px;
+    line-height: 46px;
+    .week-item {
+      float: left;
+      width: 14.285%;
+      text-align: center;
+      font-size: 14px;
+      color: #424953;
+      font-weight: 600;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+  }
+  .m-calendar-view {
+    width: 100%;
+    .date-view {
+      float: left;
+      width: 14.285%;
+      height: 100%;
+      display: flex;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      cursor: pointer;
+      border-right: 1px solid #e4e7ea;
+      border-top: 1px solid #e4e7ea;
+      position: relative;
+      &:nth-child(7n) {
+        border-right: 0;
+      }
+      .date-day {
+        position: absolute;
+        font-size: 12px;
+        color: #7f8794;
+        right: 3px;
+        bottom: 0;
+        z-index: 1000;
+      }
+    }
+    .disable {
+      background: rgba(165, 163, 163, 0.03);
+      cursor: not-allowed;
+    }
+    .opacity-class {
+      // opacity: 0.5;
+      // background-image: linear-gradient(
+      //   45deg,
+      //   rgba(000, 000, 000, 0.03) 25%,
+      //   transparent 25%,
+      //   transparent 50%,
+      //   rgba(000, 000, 000, 0.03) 50%,
+      //   rgba(000, 000, 000, 0.03) 75%,
+      //   transparent 75%,
+      //   transparent
+      // );
+      background: rgba(165, 163, 163, 0.03);
+      background-size: 20px 20px;
+    }
+    .todayBg {
+      color: #09bdc6;
+    }
+    .handleDay {
+      background: #09bdc6 !important;
+      color: #ffffff !important;
     }
   }
 }
