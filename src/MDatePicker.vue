@@ -25,11 +25,11 @@
             { handleDay: item.clickDay },
             { disable: item.disable }
           ]"
-          :style="{ height: boxHeight + 'px' }"
         >
           <span
             class="date-day"
             :class="[{ 'opacity-class': !methodIsCurrentMonth(item.date) }]"
+            :style="{ height: boxHeight + 'px', 'line-height': boxHeight + 'px' }"
             @click="handleClickDay(item)"
           >
             {{ item.day }}
@@ -101,10 +101,10 @@ export default {
       }
     },
     // 单元格风格
-    itemCustom: {
-      type: Function,
+    itemCustomValue: {
+      type: Array,
       default() {
-        return () => {}
+        return []
       }
     },
     // 外部传入方法，判断单元格是否disabled
@@ -251,8 +251,14 @@ export default {
             : false,
           disable: this.pickerOptions(date)
         }
+        let dayInfo = {}
+        this.itemCustomValue.forEach(item => {
+          if (utils.timeFormat(date, 'YYYYMMDD') === item.monthDay) {
+            dayInfo = item
+          }
+        })
 
-        calendarArr.push(Object.assign({}, obj, this.itemCustom(obj)))
+        calendarArr.push(Object.assign({}, obj, dayInfo))
         this.visibleCalendar = calendarArr
         this.calendarDictionary[new Date(startTime + i * 24 * 60 * 60 * 1000).getTime()] = obj
       }
@@ -278,6 +284,13 @@ export default {
         this.methodGetDayList()
       },
       immediate: true
+    },
+    itemCustomValue: {
+      handler(val) {
+        this.methodGetDayList()
+      },
+      immediate: true,
+      deep: true
     },
     value: {
       handler(val) {
