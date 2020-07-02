@@ -34,7 +34,7 @@
 | 字段 | 说明  | 类型  | 可选值 | 默认值 |
 |:------------|:---------------|:-----|:--------|:--------|
 | type | 日历类型 | String | radio／rectangle | radio |
-| box-height | 单元格高度 | String | - | 30 |
+| box-height | 单元格高度 | Number | - | 30 |
 | v-model | 初始绑定日期 | Date  | - | - |
 | picker-options | 判断单元格是否disabled | Function | - | - |
 | item-custom-value | 仅radio模式使用，传入对象，参数有3个值，showDot：是否显示点，color：点的颜色，monthDay：日期；如[{monthDay: '20200314', showDot: true, color: '#000000'}] | Function | - | - |
