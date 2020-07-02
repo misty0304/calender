@@ -14,10 +14,10 @@
   class="calendar"
   type="radio"
   :box-height="30"
-  v-model="query.date"
-  :picker-options="methodDisabledStartDate"
-  :item-custom="methodItemCustom"
-  :watch-options="unAttendanceDate"
+  v-model="value"
+  :picker-options="pickerOptions"
+  :item-custom-value="itemCustomValue"
+  :watch-options="watchOptions"
   @handleClickDay="handleClickDay"
   @handlePrevMonth="handlePrevMonth"
   @handleNextMonth="handleNextMonth"
@@ -37,7 +37,7 @@
 | box-height | 单元格高度 | String | - | 30 |
 | v-model | 初始绑定日期 | Date  | - | - |
 | picker-options | 判断单元格是否disabled | Function | - | - |
-| item-custom | 仅radio模式使用，传入参数有2个值，showDot：是否显示点，color：点的颜色 | Function | - | - |
+| item-custom-value | 仅radio模式使用，传入对象，参数有3个值，showDot：是否显示点，color：点的颜色，date：日期；如[{date: 2020-03-14, showDot: true, color: '#000000'}] | Function | - | - |
 | watch-options | 额外禁用的日期 | Array | - | [] |
 
 ### Methods
